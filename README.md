@@ -51,6 +51,23 @@ If you prefer to configure manually, add to your MCP client config:
 }
 ```
 
+Add `--readonly` to expose a second server (`ue-mcp-readonly`) with only read/inspect actions. Useful for auto-approving read calls while keeping writes gated:
+
+```json
+{
+  "mcpServers": {
+    "ue-mcp": {
+      "command": "npx",
+      "args": ["ue-mcp", "C:/path/to/MyGame.uproject"]
+    },
+    "ue-mcp-readonly": {
+      "command": "npx",
+      "args": ["ue-mcp", "C:/path/to/MyGame.uproject", "--readonly"]
+    }
+  }
+}
+```
+
 ## Documentation
 
 **[db-lyon.github.io/ue-mcp](https://db-lyon.github.io/ue-mcp/)**

@@ -25,6 +25,25 @@ The easiest way to configure UE-MCP is to run `npx ue-mcp init` — it detects y
 | Claude Desktop | `claude_desktop_config.json` |
 | Cursor | `mcp.json` in `.cursor/` or project root |
 
+### Read-only mode
+
+Add `--readonly` to register a second server that exposes only read/inspect actions. Auto-approve `mcp__ue-mcp-readonly__*` in your client's permission settings; write operations require explicit approval via `mcp__ue-mcp__*`.
+
+```json
+{
+  "mcpServers": {
+    "ue-mcp": {
+      "command": "npx",
+      "args": ["ue-mcp", "C:/path/to/MyGame.uproject"]
+    },
+    "ue-mcp-readonly": {
+      "command": "npx",
+      "args": ["ue-mcp", "C:/path/to/MyGame.uproject", "--readonly"]
+    }
+  }
+}
+```
+
 ### Without a Project Path
 
 You can start the server without a `.uproject` argument. It will run in a limited mode — you can then use `project(action="set_project", projectPath="...")` at runtime to attach to a project.
