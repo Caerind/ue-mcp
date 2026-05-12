@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { categoryTool, bp, type ToolDef } from "../types.js";
+import { categoryTool, bp, ro, type ToolDef } from "../types.js";
 import { Color } from "../schemas.js";
 
 export const materialTool: ToolDef = categoryTool(
   "material",
   "Materials: create, read, parameters, shading, textures, and graph authoring (expression nodes, connections).",
   {
-    read:              bp("Read material structure. Params: assetPath", "read_material", (p) => ({ assetPath: p.assetPath })),
-    list_parameters:   bp("List overridable parameters. Params: assetPath", "list_material_parameters", (p) => ({ assetPath: p.assetPath })),
+    read:              ro(bp("Read material structure. Params: assetPath", "read_material", (p) => ({ assetPath: p.assetPath }))),
+    list_parameters:   ro(bp("List overridable parameters. Params: assetPath", "list_material_parameters", (p) => ({ assetPath: p.assetPath }))),
     set_parameter:     bp("Set parameter on MaterialInstance. Params: assetPath, parameterName, parameterType, value", "set_material_parameter"),
     set_expression_value: bp("Set value on expression node. Params: materialPath, expressionIndex, value", "set_expression_value"),
     disconnect_property: bp("Disconnect a material property input. Params: materialPath, property", "disconnect_material_property"),
@@ -22,14 +22,14 @@ export const materialTool: ToolDef = categoryTool(
     add_expression:    bp("Add expression node. Params: materialPath, expressionType, name?, parameterName?", "add_material_expression"),
     connect_expressions: bp("Wire two expressions. Params: materialPath, sourceExpression, sourceOutput?, targetExpression, targetInput?", "connect_material_expressions"),
     connect_to_property: bp("Wire expression to material output. Params: materialPath, expressionName, outputName?, property", "connect_to_material_property"),
-    list_expressions:  bp("List expression nodes. Params: materialPath", "list_material_expressions"),
+    list_expressions:  ro(bp("List expression nodes. Params: materialPath", "list_material_expressions")),
     delete_expression: bp("Remove expression. Params: materialPath, expressionName", "delete_material_expression"),
-    list_expression_types: bp("List available expression types", "list_expression_types"),
+    list_expression_types: ro(bp("List available expression types", "list_expression_types")),
     recompile:         bp("Recompile material. Params: materialPath", "recompile_material"),
     duplicate:         bp("Duplicate material asset. Params: sourcePath, destinationPath", "duplicate_material"),
-    validate:          bp("Validate material graph — find orphans, broken refs. Params: assetPath", "validate_material", (p) => ({ assetPath: p.assetPath ?? p.materialPath })),
-    get_shader_stats:  bp("Shader compile stats, sampler+param counts. Params: assetPath", "get_material_shader_stats", (p) => ({ assetPath: p.assetPath ?? p.materialPath })),
-    export_graph:      bp("Export material graph as JSON. Params: assetPath", "export_material_graph", (p) => ({ assetPath: p.assetPath ?? p.materialPath })),
+    validate:          ro(bp("Validate material graph — find orphans, broken refs. Params: assetPath", "validate_material", (p) => ({ assetPath: p.assetPath ?? p.materialPath }))),
+    get_shader_stats:  ro(bp("Shader compile stats, sampler+param counts. Params: assetPath", "get_material_shader_stats", (p) => ({ assetPath: p.assetPath ?? p.materialPath }))),
+    export_graph:      ro(bp("Export material graph as JSON. Params: assetPath", "export_material_graph", (p) => ({ assetPath: p.assetPath ?? p.materialPath }))),
     import_graph:      bp("Rebuild graph from JSON. Params: assetPath, nodes, propertyConnections?", "import_material_graph"),
     build_graph:       bp("Build graph from spec. Params: assetPath, nodes, propertyConnections?", "build_material_graph"),
     render_preview:    bp("Render preview PNG. Params: assetPath, outputPath, width?, height?", "render_material_preview", (p) => ({ assetPath: p.assetPath ?? p.materialPath, outputPath: p.outputPath, width: p.width, height: p.height })),

@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { z } from "zod";
-import { categoryTool, bp, type ToolDef } from "../types.js";
+import { categoryTool, bp, ro, type ToolDef } from "../types.js";
 import { Vec3, Rotator } from "../schemas.js";
 
 export const assetTool: ToolDef = categoryTool(
@@ -10,6 +10,7 @@ export const assetTool: ToolDef = categoryTool(
   {
     list: {
       description: "List assets in directory. Params: directory?, typeFilter?, recursive?",
+      readonly: true,
       handler: async (ctx, p) => {
         ctx.project.ensureLoaded();
         const dir = p.directory ? ctx.project.resolveContentDir(p.directory as string) : ctx.project.contentDir!;
@@ -43,6 +44,7 @@ export const assetTool: ToolDef = categoryTool(
     },
     search: {
       description: "Search by name/class/path. Params: query, directory?, maxResults?, searchAll?",
+      readonly: true,
       handler: async (ctx, p) => {
         const { action: _, ...rest } = p;
         const roots = ctx.project.config.contentRoots;
@@ -68,8 +70,8 @@ export const assetTool: ToolDef = categoryTool(
         return ctx.bridge.call("search_assets", rest);
       },
     },
-    read:           bp("Read asset via reflection. Params: assetPath", "read_asset", (p) => ({ path: p.assetPath })),
-    read_properties: bp("Read asset properties with values. Params: assetPath, propertyName?, includeValues?", "read_asset_properties"),
+    read:           ro(bp("Read asset via reflection. Params: assetPath", "read_asset", (p) => ({ path: p.assetPath }))),
+    read_properties: ro(bp("Read asset properties with values. Params: assetPath, propertyName?, includeValues?", "read_asset_properties")),
     duplicate:      bp("Duplicate asset. Params: sourcePath, destinationPath", "duplicate_asset"),
     rename:         bp("Rename asset. Params: assetPath, newName. For batches of 3+ scene-referenced assets use bulk_rename instead — each single rename forces a full redirector-fixup pass and can crash the editor.", "rename_asset"),
     bulk_rename:    bp("Batched rename using IAssetTools::RenameAssets — single transaction with one redirector-fixup pass (matches Content Browser drag). Use this over looped rename for scene-referenced assets. Params: renames[] where each entry is {sourcePath, destinationPath} OR {assetPath, newName}.", "bulk_rename_assets", (p) => ({ renames: p.renames })),
@@ -89,11 +91,11 @@ export const assetTool: ToolDef = categoryTool(
     import_animation:     bp("Import anim from FBX. Params: filePath, name?, packagePath?, skeletonPath", "import_animation", (p) => ({ filename: p.filePath, destinationPath: p.packagePath, assetName: p.name, skeletonPath: p.skeletonPath })),
     import_texture:       bp("Import image. Params: filePath, name?, packagePath?", "import_texture", (p) => ({ filename: p.filePath, destinationPath: p.packagePath, assetName: p.name })),
     reimport:             bp("Reimport asset from source file. Params: assetPath, filePath?", "reimport_asset", (p) => ({ assetPath: p.assetPath, filePath: p.filePath })),
-    read_datatable:       bp("Read DataTable rows. Params: assetPath, rowFilter?", "read_datatable", (p) => ({ path: p.assetPath, rowFilter: p.rowFilter })),
+    read_datatable:       ro(bp("Read DataTable rows. Params: assetPath, rowFilter?", "read_datatable", (p) => ({ path: p.assetPath, rowFilter: p.rowFilter }))),
     create_datatable:     bp("Create DataTable. Params: name, packagePath?, rowStruct", "create_datatable"),
     reimport_datatable:   bp("Reimport DataTable from JSON. Params: assetPath, jsonPath?, jsonString?", "reimport_datatable", (p) => ({ path: p.assetPath, jsonPath: p.jsonPath, jsonString: p.jsonString })),
-    list_textures:        bp("List textures. Params: directory?, recursive?", "list_textures"),
-    get_texture_info:     bp("Get texture details. Params: assetPath", "get_texture_info"),
+    list_textures:        ro(bp("List textures. Params: directory?, recursive?", "list_textures")),
+    get_texture_info:     ro(bp("Get texture details. Params: assetPath", "get_texture_info")),
     set_texture_settings: bp("Set texture settings. Params: assetPath, settings (object with compressionSettings?, lodGroup?, sRGB?, neverStream?). Keys may also be passed at the top level.", "set_texture_settings", (p) => ({
       assetPath: p.assetPath,
       ...(typeof p.settings === "object" && p.settings !== null ? p.settings : {}),
@@ -104,19 +106,19 @@ export const assetTool: ToolDef = categoryTool(
     })),
     add_socket:           bp("Add socket to StaticMesh or SkeletalMesh. Params: assetPath, socketName, boneName?, relativeLocation?, relativeRotation?, relativeScale?", "add_socket"),
     remove_socket:        bp("Remove socket by name. Params: assetPath, socketName", "remove_socket"),
-    list_sockets:         bp("List sockets on a mesh. Params: assetPath", "list_sockets", (p) => ({ assetPath: p.assetPath })),
+    list_sockets:         ro(bp("List sockets on a mesh. Params: assetPath", "list_sockets", (p) => ({ assetPath: p.assetPath }))),
     reload_package:       bp("Force reload an asset package from disk. Params: assetPath", "reload_package"),
-    health_check:         bp("Diagnose stuck-unloadable asset. Returns onDisk/inRegistry/isLoaded/canLoad/isStuck flags so an agent can detect the half-shutdown state where load returns null but the file exists (#279). Params: assetPath", "asset_health_check"),
+    health_check:         ro(bp("Diagnose stuck-unloadable asset. Returns onDisk/inRegistry/isLoaded/canLoad/isStuck flags so an agent can detect the half-shutdown state where load returns null but the file exists (#279). Params: assetPath", "asset_health_check")),
     force_reload:         bp("Aggressive reload that resets package loaders + GCs + LoadObject. Recovers from the half-shutdown state without an editor restart (#279). Closes any open editors first. Params: assetPath", "force_reload_asset"),
     export:               bp("Export asset to disk file (Texture2D → PNG, StaticMesh → FBX, etc.). Params: assetPath, outputPath", "export_asset"),
-    search_fts:           bp("Ranked asset search (token-scored over name/class/path). Params: query, maxResults?, classFilter?", "search_assets_fts", (p) => ({ query: p.query, maxResults: p.maxResults, classFilter: p.classFilter })),
+    search_fts:           ro(bp("Ranked asset search (token-scored over name/class/path). Params: query, maxResults?, classFilter?", "search_assets_fts", (p) => ({ query: p.query, maxResults: p.maxResults, classFilter: p.classFilter }))),
     reindex_fts:          bp("Rebuild the SQLite FTS5 asset index. Params: directory?", "reindex_assets_fts", (p) => ({ directory: p.directory })),
-    get_referencers:      bp("Reverse dependency lookup. Params: packages[] OR packagePath (#150). Returns {referencersByPackage, totalReferencers}.", "get_asset_referencers", (p) => ({ packages: p.packages, packagePath: p.packagePath })),
+    get_referencers:      ro(bp("Reverse dependency lookup. Params: packages[] OR packagePath (#150). Returns {referencersByPackage, totalReferencers}.", "get_asset_referencers", (p) => ({ packages: p.packages, packagePath: p.packagePath }))),
     // v1.0.0-rc.2 — #155 (asset gaps)
     set_sk_material_slots: bp("Set materials on a USkeletalMesh by slot name or slotIndex (bypasses the blueprint override-materials path that UE's ICH silently reverts). Params: assetPath, slots[{slotName?|slotIndex?, materialPath}]", "set_sk_material_slots"),
-    diagnose_registry:    bp("Scan a content path and compare disk vs AssetRegistry (including in-memory pending-kill entries). Returns onDiskCount, inMemoryIncludedCount, ghostCount and paths. Params: path, recursive? (default true), reconcile? (forceRescan=true)", "diagnose_registry"),
-    get_mesh_bounds:      bp("Get StaticMesh bounding box. Params: assetPath. Returns min, max, boxExtent, boxCenter (#193)", "get_mesh_bounds"),
-    get_mesh_collision:   bp("Inspect StaticMesh collision setup. Params: assetPath. Returns collisionTraceFlag, hasSimple/ComplexCollision, element counts (#177)", "get_mesh_collision"),
+    diagnose_registry:    ro(bp("Scan a content path and compare disk vs AssetRegistry (including in-memory pending-kill entries). Returns onDiskCount, inMemoryIncludedCount, ghostCount and paths. Params: path, recursive? (default true), reconcile? (forceRescan=true)", "diagnose_registry")),
+    get_mesh_bounds:      ro(bp("Get StaticMesh bounding box. Params: assetPath. Returns min, max, boxExtent, boxCenter (#193)", "get_mesh_bounds")),
+    get_mesh_collision:   ro(bp("Inspect StaticMesh collision setup. Params: assetPath. Returns collisionTraceFlag, hasSimple/ComplexCollision, element counts (#177)", "get_mesh_collision")),
     move_folder:          bp("Move/rename entire content folder with redirector fixup in one transaction. Params: sourcePath, destinationPath (#192)", "move_folder"),
     create_folder:        bp("Create empty content browser folder(s). Params: path OR paths[] (e.g. /Game/Foo, /Game/Bar/Baz). Returns per-path created/existed/failed (#212)", "create_folder", (p) => ({ path: p.path, paths: p.paths })),
     set_mesh_nav:         bp("Set StaticMesh nav contribution. Params: assetPath, bHasNavigationData?, clearNavCollision? (#167)", "set_mesh_nav"),

@@ -1,14 +1,14 @@
 import { z } from "zod";
-import { categoryTool, bp, type ToolDef } from "../types.js";
+import { categoryTool, bp, ro, type ToolDef } from "../types.js";
 import { Vec3 } from "../schemas.js";
 
 export const foliageTool: ToolDef = categoryTool(
   "foliage",
   "Foliage painting, types, sampling, and settings.",
   {
-    list_types:    bp("List foliage types in level", "list_foliage_types"),
-    get_settings:  bp("Read foliage type settings. Params: foliageTypeName", "get_foliage_type_settings"),
-    sample:        bp("Query instances in region. Params: center, radius, foliageType?", "sample_foliage"),
+    list_types:    ro(bp("List foliage types in level", "list_foliage_types")),
+    get_settings:  ro(bp("Read foliage type settings. Params: foliageTypeName", "get_foliage_type_settings")),
+    sample:        ro(bp("Query instances in region. Params: center, radius, foliageType?", "sample_foliage")),
     paint:         bp("Add foliage. Params: foliageType, center, radius, count?, density?", "paint_foliage"),
     erase:         bp("Remove foliage. Params: center, radius, foliageType?", "erase_foliage"),
     create_type:   bp("Create foliage type from mesh. Params: meshPath, name?, packagePath?", "create_foliage_type"),

@@ -27,6 +27,9 @@ export interface ActionSpec {
   handler?: (ctx: ToolContext, params: Record<string, unknown>) => Promise<unknown>;
   /** Override the bridge call timeout in milliseconds. Defaults to 30s. */
   timeoutMs?: number;
+  /** Mark as true for actions that only read state and never mutate it.
+   *  Used by --readonly mode to expose a safe, auto-approvable subset. */
+  readonly?: boolean;
 }
 
 export function categoryTool(
@@ -86,6 +89,12 @@ export function bp(...args: unknown[]): ActionSpec {
     return { description: args[0] as string, bridge: args[1] as string, mapParams: args[2] as ((p: Record<string, unknown>) => Record<string, unknown>) | undefined };
   }
   return { bridge: args[0] as string, mapParams: args[1] as ((p: Record<string, unknown>) => Record<string, unknown>) | undefined };
+}
+
+/** Mark an ActionSpec as read-only (pure inspection, no mutation).
+ *  Used by --readonly mode to build a safe, auto-approvable subset of each tool. */
+export function ro(spec: ActionSpec): ActionSpec {
+  return { ...spec, readonly: true };
 }
 
 /* ── Directive response ─────────────────────────────────────────────

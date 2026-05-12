@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { categoryTool, bp, type ToolDef } from "../types.js";
+import { categoryTool, bp, ro, type ToolDef } from "../types.js";
 
 export const gasTool: ToolDef = categoryTool(
   "gas",
@@ -13,7 +13,7 @@ export const gasTool: ToolDef = categoryTool(
     create_effect:       bp("Create GameplayEffect BP. Params: name, packagePath?, durationPolicy?", "create_gameplay_effect"),
     set_effect_modifier: bp("Add modifier. Params: effectPath, attribute, operation?, magnitude?", "set_effect_modifier"),
     create_cue:          bp("Create GameplayCue. Params: name, packagePath?, cueType?", "create_gameplay_cue"),
-    get_info:            bp("Inspect GAS setup. Params: blueprintPath", "get_gas_info"),
+    get_info:            ro(bp("Inspect GAS setup. Params: blueprintPath", "get_gas_info")),
   },
   undefined,
   {

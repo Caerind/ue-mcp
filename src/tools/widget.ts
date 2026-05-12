@@ -1,15 +1,15 @@
 import { z } from "zod";
-import { categoryTool, bp, type ToolDef } from "../types.js";
+import { categoryTool, bp, ro, type ToolDef } from "../types.js";
 
 export const widgetTool: ToolDef = categoryTool(
   "widget",
   "UMG Widget Blueprints, Editor Utility Widgets, and Editor Utility Blueprints.",
   {
-    read_tree:         bp("Read widget hierarchy. Params: assetPath", "read_widget_tree"),
-    get_details:       bp("Inspect widget. Params: assetPath, widgetName", "get_widget_details"),
+    read_tree:         ro(bp("Read widget hierarchy. Params: assetPath", "read_widget_tree")),
+    get_details:       ro(bp("Inspect widget. Params: assetPath, widgetName", "get_widget_details")),
     set_property:      bp("Set widget property. Params: assetPath, widgetName, propertyName, value", "set_widget_property"),
-    list:              bp("List Widget BPs. Params: directory?, recursive?", "list_widget_blueprints"),
-    read_animations:   bp("Read UMG animations. Params: assetPath", "read_widget_animations"),
+    list:              ro(bp("List Widget BPs. Params: directory?, recursive?", "list_widget_blueprints")),
+    read_animations:   ro(bp("Read UMG animations. Params: assetPath", "read_widget_animations")),
     create:            bp("Create Widget BP. Params: name, packagePath?, parentClass?", "create_widget_blueprint"),
     create_utility_widget:    bp("Create editor utility widget. Params: name, packagePath?", "create_editor_utility_widget"),
     run_utility_widget:       bp("Open editor utility widget. Params: assetPath", "run_editor_utility_widget"),
@@ -18,10 +18,10 @@ export const widgetTool: ToolDef = categoryTool(
     add_widget:               bp("Add widget to widget tree. Params: assetPath, widgetClass, widgetName?, parentWidgetName?", "add_widget"),
     remove_widget:            bp("Remove widget from tree. Params: assetPath, widgetName", "remove_widget"),
     move_widget:              bp("Reparent widget. Params: assetPath, widgetName, newParentWidgetName", "move_widget"),
-    list_classes:             bp("List available widget classes", "list_widget_classes"),
-    list_runtime:             bp("(#160) List live UUserWidget instances in the PIE world. Params: classFilter?, namePrefix?, viewportOnly?", "list_runtime_widgets"),
-    get_runtime:              bp("(#160) Inspect a live PIE widget tree with text/visibility/brush/percent values. Params: widgetName? | className?, childName?, maxDepth?", "get_runtime_widget"),
-    get_runtime_delegates:    bp("(#161) Read delegate binding state on a live PIE widget. Params: widgetName, className?. Returns array of {delegateName, isBound, numBindings}", "get_runtime_delegates"),
+    list_classes:             ro(bp("List available widget classes", "list_widget_classes")),
+    list_runtime:             ro(bp("(#160) List live UUserWidget instances in the PIE world. Params: classFilter?, namePrefix?, viewportOnly?", "list_runtime_widgets")),
+    get_runtime:              ro(bp("(#160) Inspect a live PIE widget tree with text/visibility/brush/percent values. Params: widgetName? | className?, childName?, maxDepth?", "get_runtime_widget")),
+    get_runtime_delegates:    ro(bp("(#161) Read delegate binding state on a live PIE widget. Params: widgetName, className?. Returns array of {delegateName, isBound, numBindings}", "get_runtime_delegates")),
   },
   undefined,
   {

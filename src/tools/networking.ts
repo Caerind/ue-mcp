@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { categoryTool, bp, type ToolDef } from "../types.js";
+import { categoryTool, bp, ro, type ToolDef } from "../types.js";
 
 export const networkingTool: ToolDef = categoryTool(
   "networking",
@@ -15,7 +15,7 @@ export const networkingTool: ToolDef = categoryTool(
     configure_cull_distance: bp("Net cull distance. Params: blueprintPath, netCullDistanceSquared?", "configure_net_cull_distance"),
     set_priority:          bp("Net priority. Params: blueprintPath, netPriority?", "set_net_priority"),
     set_replicate_movement: bp("Replicate movement. Params: blueprintPath, replicateMovement?", "set_replicate_movement"),
-    get_info:              bp("Get networking info. Params: blueprintPath", "get_networking_info"),
+    get_info:              ro(bp("Get networking info. Params: blueprintPath", "get_networking_info")),
   },
   undefined,
   {
