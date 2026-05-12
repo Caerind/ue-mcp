@@ -5,7 +5,9 @@
  * import the list without triggering the MCP server's top-level `main()`
  * side effect.
  */
+import { z } from "zod";
 import type { ToolDef } from "./types.js";
+import { McpError, ErrorCode } from "./errors.js";
 
 import { projectTool } from "./tools/project.js";
 import { assetTool } from "./tools/asset.js";
@@ -48,6 +50,43 @@ export const ALL_TOOLS: ToolDef[] = [
   demoTool,
   feedbackTool,
 ];
+
+/** Return a copy of `tool` restricted to actions tagged `readonly: true`.
+ *  Returns null if the tool has no readonly actions (omit it from the server). */
+export function filterReadonlyActions(tool: ToolDef): ToolDef | null {
+  const readonlyEntries = Object.entries(tool.actions).filter(([, s]) => s.readonly);
+  if (readonlyEntries.length === 0) return null;
+
+  const readonlyActions = Object.fromEntries(readonlyEntries);
+  const readonlyNames = Object.keys(readonlyActions) as [string, ...string[]];
+
+  const summaryLine = tool.description.split("\n\nActions:\n")[0];
+  const docs = readonlyNames
+    .map((a) => { const d = readonlyActions[a].description; return d ? `- ${a}: ${d}` : `- ${a}`; })
+    .join("\n");
+
+  return {
+    name: tool.name,
+    description: `${summaryLine}\n\nActions:\n${docs}`,
+    schema: { ...tool.schema, action: z.enum(readonlyNames).describe("Action to perform") },
+    actions: readonlyActions,
+    handler: async (ctx, params) => {
+      const action = params.action as string;
+      const spec = readonlyActions[action];
+      if (!spec) {
+        throw new McpError(ErrorCode.UNKNOWN_ACTION,
+          `Unknown action '${action}' in readonly mode. Available: ${readonlyNames.join(", ")}`);
+      }
+      if (spec.handler) return spec.handler(ctx, params);
+      if (spec.bridge) {
+        const { action: _a, ...rest } = params;
+        const mapped = spec.mapParams ? spec.mapParams(params) : rest;
+        return ctx.bridge.call(spec.bridge, mapped, spec.timeoutMs);
+      }
+      throw new McpError(ErrorCode.NO_HANDLER, `Action '${action}' has no handler or bridge method`);
+    },
+  };
+}
 
 /** Flatten to (toolName, actionName, bridgeMethod) triples for every action
  *  that dispatches to a C++ bridge method (i.e. has `bridge` set). Local-only

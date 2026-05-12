@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { categoryTool, bp, type ToolDef } from "../types.js";
+import { categoryTool, bp, ro, type ToolDef } from "../types.js";
 import { Vec3 } from "../schemas.js";
 
 export const audioTool: ToolDef = categoryTool(
   "audio",
   "Audio: sound assets, playback, ambient sounds, SoundCues, MetaSounds.",
   {
-    list:              bp("List sound assets. Params: directory?, recursive?", "list_sound_assets"),
+    list:              ro(bp("List sound assets. Params: directory?, recursive?", "list_sound_assets")),
     play_at_location:  bp("Play sound. Params: soundPath, location, volumeMultiplier?, pitchMultiplier?", "play_sound_at_location"),
     spawn_ambient:     bp("Place ambient sound. Params: soundPath, location, label?", "spawn_ambient_sound"),
     create_cue:        bp("Create SoundCue. Params: name, packagePath?, soundWavePath?", "create_sound_cue"),

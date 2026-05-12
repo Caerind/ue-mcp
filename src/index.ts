@@ -17,7 +17,7 @@ import { startFlowHttpServer } from "./flow/http-server.js";
 import type { FlowContext } from "./flow/context.js";
 import type { FlowConfig } from "./flow/schema.js";
 
-import { ALL_TOOLS } from "./tools.js";
+import { ALL_TOOLS, filterReadonlyActions } from "./tools.js";
 
 type TextBlock = { type: "text"; text: string };
 
@@ -27,6 +27,8 @@ function withUpgradeNotice(content: TextBlock[]): TextBlock[] {
 }
 
 async function main() {
+  const isReadonly = process.argv.includes("--readonly");
+
   const bridge = new EditorBridge();
   const project = new ProjectContext();
 
@@ -59,14 +61,17 @@ async function main() {
   const taskCount = registry.listRegistered().length;
 
   const server = new McpServer({
-    name: "ue-mcp",
+    name: isReadonly ? "ue-mcp-readonly" : "ue-mcp",
     version: "0.6.4",
   }, {
     instructions: SERVER_INSTRUCTIONS,
   });
 
   const disabled = new Set(project.config.disable ?? []);
-  const tools = ALL_TOOLS.filter((t) => !disabled.has(t.name));
+  const baseTools = ALL_TOOLS.filter((t) => !disabled.has(t.name));
+  const tools = isReadonly
+    ? baseTools.flatMap((t) => { const r = filterReadonlyActions(t); return r ? [r] : []; })
+    : baseTools;
 
   // ── Register category tools — dispatched through the task registry ──
   for (const tool of tools) {

@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { z } from "zod";
-import { categoryTool, bp, type ToolDef, type ToolContext } from "../types.js";
+import { categoryTool, bp, ro, type ToolDef, type ToolContext } from "../types.js";
 import { deploy, deploySummary, findEngineInstall } from "../deployer.js";
 
 function resolveConfigPath(configDir: string, configName: string): string {
@@ -125,6 +125,7 @@ export const projectTool: ToolDef = categoryTool(
   {
     get_status: {
       description: "Check server mode and editor connection",
+      readonly: true,
       handler: async (ctx) => {
         const flows = ctx.getFlows?.() ?? [];
         return {
@@ -149,6 +150,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     get_info: {
       description: "Read .uproject file details",
+      readonly: true,
       handler: async (ctx) => {
         ctx.project.ensureLoaded();
         return { projectName: ctx.project.projectName, engineAssociation: ctx.project.engineAssociation, contentDir: ctx.project.contentDir, uprojectContents: JSON.parse(fs.readFileSync(ctx.project.projectPath!, "utf-8")) };
@@ -156,6 +158,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     read_config: {
       description: "Read INI config. Params: configName (e.g. 'Engine', 'Game')",
+      readonly: true,
       handler: async (ctx, p) => {
         ctx.project.ensureLoaded();
         const filePath = resolveConfigPath(ctx.project.configDir!, p.configName as string);
@@ -166,6 +169,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     search_config: {
       description: "Search INI files. Params: query",
+      readonly: true,
       handler: async (ctx, p) => {
         ctx.project.ensureLoaded();
         const configDir = ctx.project.configDir!;
@@ -185,6 +189,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     list_config_tags: {
       description: "Extract gameplay tags from config",
+      readonly: true,
       handler: async (ctx) => {
         ctx.project.ensureLoaded();
         const configDir = ctx.project.configDir!;
@@ -205,6 +210,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     read_cpp_header: {
       description: "Parse a .h file. Params: headerPath",
+      readonly: true,
       handler: async (ctx, p) => {
         ctx.project.ensureLoaded();
         const headerPath = p.headerPath as string;
@@ -220,6 +226,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     read_module: {
       description: "Read module source. Params: moduleName",
+      readonly: true,
       handler: async (ctx, p) => {
         ctx.project.ensureLoaded();
         const moduleName = p.moduleName as string;
@@ -236,6 +243,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     list_modules: {
       description: "List C++ modules",
+      readonly: true,
       handler: async (ctx) => {
         ctx.project.ensureLoaded();
         const roots = findSourceRoots(ctx.project.projectDir!, ctx.project.projectName);
@@ -253,6 +261,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     search_cpp: {
       description: "Search .h/.cpp files. Params: query, directory?",
+      readonly: true,
       handler: async (ctx, p) => {
         ctx.project.ensureLoaded();
         const roots = findSourceRoots(ctx.project.projectDir!, ctx.project.projectName);
@@ -300,6 +309,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     read_engine_header: {
       description: "Parse a .h file from the engine source tree. Params: headerPath (relative to Engine/Source, or absolute)",
+      readonly: true,
       handler: async (ctx, p) => {
         ctx.project.ensureLoaded();
         const engineRoot = findEngineInstall(ctx.project.engineAssociation ?? null);
@@ -315,6 +325,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     find_engine_symbol: {
       description: "Grep engine headers for a symbol. Params: symbol, maxResults?",
+      readonly: true,
       handler: async (ctx, p) => {
         ctx.project.ensureLoaded();
         const engineRoot = findEngineInstall(ctx.project.engineAssociation ?? null);
@@ -347,6 +358,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     list_engine_modules: {
       description: "List modules in Engine/Source/Runtime",
+      readonly: true,
       handler: async (ctx) => {
         ctx.project.ensureLoaded();
         const engineRoot = findEngineInstall(ctx.project.engineAssociation ?? null);
@@ -361,6 +373,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     search_engine_cpp: {
       description: "Search engine .h/.cpp/.inl files across Runtime/Editor/Developer/Plugins. Params: query, tree? (Runtime|Editor|Developer|Plugins|all — default Runtime), subdirectory?, maxResults? (default 500)",
+      readonly: true,
       handler: async (ctx, p) => {
         ctx.project.ensureLoaded();
         const resolvedEngineRoot = findEngineInstall(ctx.project.engineAssociation ?? null);
@@ -436,22 +449,22 @@ export const projectTool: ToolDef = categoryTool(
         subPath: p.subPath,
       }),
     },
-    list_project_modules: bp(
+    list_project_modules: ro(bp(
       "List native modules in the current project (name, host type, source path). Feed moduleName from here into create_cpp_class.",
       "list_project_modules",
       () => ({}),
-    ),
+    )),
     live_coding_compile: {
       description: "Trigger a Live Coding compile (Windows only). Hot-patches method bodies of existing UCLASSes without editor restart — the fast inner loop for UFUNCTION implementations. Does NOT reliably register brand-new UCLASSes; use build_project + editor restart for those. Params: wait? (default false — fire and return 'in_progress').",
       bridge: "live_coding_compile",
       timeoutMs: 300_000,
       mapParams: (p) => ({ wait: p.wait }),
     },
-    live_coding_status: bp(
+    live_coding_status: ro(bp(
       "Report Live Coding availability/state (available, started, enabledForSession, compiling). Helps choose between live_coding_compile and build_project.",
       "live_coding_status",
       () => ({}),
-    ),
+    )),
 
     write_cpp_file: {
       description:
@@ -488,6 +501,7 @@ export const projectTool: ToolDef = categoryTool(
     },
     read_cpp_source: {
       description: "Read a .cpp file from the project Source/ tree. Companion to read_cpp_header for round-trip edits. Params: sourcePath (relative to Source/ or absolute).",
+      readonly: true,
       handler: async (ctx, p) => {
         ctx.project.ensureLoaded();
         const sp = p.sourcePath as string;

@@ -1,16 +1,16 @@
 import { z } from "zod";
-import { categoryTool, bp, type ToolDef } from "../types.js";
+import { categoryTool, bp, ro, type ToolDef } from "../types.js";
 import { Vec3 } from "../schemas.js";
 
 export const pcgTool: ToolDef = categoryTool(
   "pcg",
   "Procedural Content Generation: graphs, nodes, connections, execution, volumes.",
   {
-    list_graphs:          bp("List PCG graphs. Params: directory?, recursive?", "list_pcg_graphs"),
-    read_graph:           bp("Read graph structure. Params: assetPath", "read_pcg_graph"),
-    read_node_settings:   bp("Read node settings. Params: assetPath, nodeName", "read_pcg_node_settings"),
-    get_components:       bp("List PCG components in level", "get_pcg_components"),
-    get_component_details: bp("Inspect PCG component. Params: actorLabel", "get_pcg_component_details"),
+    list_graphs:          ro(bp("List PCG graphs. Params: directory?, recursive?", "list_pcg_graphs")),
+    read_graph:           ro(bp("Read graph structure. Params: assetPath", "read_pcg_graph")),
+    read_node_settings:   ro(bp("Read node settings. Params: assetPath, nodeName", "read_pcg_node_settings")),
+    get_components:       ro(bp("List PCG components in level", "get_pcg_components")),
+    get_component_details: ro(bp("Inspect PCG component. Params: actorLabel", "get_pcg_component_details")),
     create_graph:         bp("Create graph. Params: name, packagePath?", "create_pcg_graph"),
     add_node:             bp("Add node. Params: assetPath, nodeType, nodeName?", "add_pcg_node"),
     connect_nodes:        bp("Wire nodes. Params: assetPath, sourceNode, sourcePin, targetNode, targetPin", "connect_pcg_nodes"),
@@ -23,7 +23,7 @@ export const pcgTool: ToolDef = categoryTool(
     toggle_graph:         bp("Toggle a PCG component's graph assignment to force reinit (no generate). Params: actorLabel, graphPath? (#146)", "toggle_pcg_graph", (p) => ({ actorLabel: p.actorLabel, graphPath: p.graphPath })),
     add_volume:           bp("Place PCG volume. Params: graphPath, location?, extent?", "add_pcg_volume"),
     import_graph:         bp("Bulk-author a PCG graph from JSON. Params: assetPath, nodes=[{name,class,posX?,posY?,settings?}], connections=[{from,fromPin?,to,toPin?}], replace? (default false). One call replaces N add_node + M connect_nodes + K set_node_settings (#213).", "import_pcg_graph", (p) => ({ assetPath: p.assetPath, nodes: p.nodes, connections: p.connections, replace: p.replace })),
-    export_graph:         bp("Export a PCG graph as JSON. Params: assetPath, includeSettings? (default true). Round-trip safe with import_graph (#213).", "export_pcg_graph", (p) => ({ assetPath: p.assetPath, includeSettings: p.includeSettings })),
+    export_graph:         ro(bp("Export a PCG graph as JSON. Params: assetPath, includeSettings? (default true). Round-trip safe with import_graph (#213).", "export_pcg_graph", (p) => ({ assetPath: p.assetPath, includeSettings: p.includeSettings }))),
   },
   undefined,
   {
